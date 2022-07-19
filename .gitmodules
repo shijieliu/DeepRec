@@ -1,0 +1,3 @@
+[submodule "sparse_operation_kit/hugectr"]
+	path = sparse_operation_kit/hugectr
+	url = https://github.com/NVIDIA-Merlin/HugeCTR.git
