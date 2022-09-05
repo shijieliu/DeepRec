@@ -14,16 +14,16 @@ sok.init()
 #                                 embedding_dim=3,
 #                                 initializer=tf.ones_initializer(tf.float32),
 #                                 partitioner=tf.fixed_size_partitioner(num_shards=4))
-
-var = tf.get_embedding_variable("var_0",
-                                embedding_dim=3,
-                                initializer=tf.ones_initializer(tf.float32))
+with tf.device('/gpu:0'):
+  var = tf.get_embedding_variable("var_0",
+                                  embedding_dim=3,
+                                  initializer=tf.ones_initializer(tf.float32))
       
 var.target_gpu = 1
 print(var.shape)
 print(type(var))
-# emb = tf.nn.embedding_lookup(var, tf.cast([0,1,2,5,6,7], tf.int64))
-emb = sok.lookup_sparse_for_deeprec(var, [[0,1,2]], hotness=[3, 4], combiners=['sum'])
+emb = tf.nn.embedding_lookup(var, tf.cast([0,1,2,5,6,7], tf.int64))
+# emb = sok.lookup_sparse_for_deeprec(var, [[0,1,2]], hotness=[3, 4], combiners=['sum'])
 
 fun = tf.multiply(emb, 2.0, name='multiply')
 loss = tf.reduce_sum(fun, name='reduce_sum')

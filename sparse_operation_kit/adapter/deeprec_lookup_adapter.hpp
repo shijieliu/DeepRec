@@ -35,22 +35,22 @@
 namespace tensorflow {
 
 template <typename KeyType, typename DType>
-class TFAdapter : public ::embedding::ILookup {
+class EmbeddingVarGPUAdapter : public ::embedding::ILookup {
 public:
-  TFAdapter();
-  ~TFAdapter();
+  EmbeddingVarGPUAdapter();
+  ~EmbeddingVarGPUAdapter();
 
-  void set(std::vector<tensorflow::core::RefCountPtr<tensorflow::Var>> &vars,
-           std::vector<tensorflow::tf_shared_lock> &locks,
+  void set(std::vector<core::RefCountPtr<EmbeddingVarGPU<KeyType, DType>>> &vars,
+           std::vector<tf_shared_lock> &locks,
            std::vector<int> &dimensions, std::vector<int> &scale,
-           cudaStream_t stream = 0) {}
+           cudaStream_t stream = 0);
 
   void lookup(const ::core::Tensor &keys, size_t num_keys,
               const ::core::Tensor &id_space_offset, size_t num_id_space_offset,
               const ::core::Tensor &id_space,
               ::core::TensorList &embedding_vec) override;
 
-private:
+// private:
 //   int sm_count_;
 //   std::vector<float *> data_;
 //   std::vector<int> dimensions_;

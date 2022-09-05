@@ -14,56 +14,56 @@
  * limitations under the License.
  */
 
+#include "deeprec_lookup_adapter.hpp"
 #include "common/check.h"
-#include "lookup_adapter.hpp"
-#include "tensorflow/core/framework/embedding/embedding_var.h"
+// #include "tensorflow/core/framework/embedding/embedding_var.h"
 
 namespace tensorflow {
 
 template <typename KeyType, typename DType>
-TFAdapter<KeyType, DType>::TFAdapter()
-    : d_data_(nullptr), d_dimensions_(nullptr),
-      d_id_space_to_local_index_(nullptr), d_scale_(nullptr), stream_(0) {
-  int device;
-  CUDACHECK(cudaGetDevice(&device));
-  CUDACHECK(cudaDeviceGetAttribute(&sm_count_, cudaDevAttrMultiProcessorCount,
-                                   device));
-  // tensorflow::core::RefCountPtr<tensorflow::EmbeddingVar<KeyType, DType>> var;
-  auto storage_manager = new embedding::StorageManager<KeyType, float>(
-                 "name", embedding::StorageConfig());
-  TF_CHECK_OK(storage_manager->Init());
-  EmbeddingVar<int64, float>* emb_var
-    = new EmbeddingVar<KeyType, float>("name",
-        storage_manager, EmbeddingConfig(0, 0, 1, 1, "", -1, 0, 99999, 14.0));
-  emb_var ->Init(value, 1);
-  // emb_var->BatchCommit();
-}
-
-// template <typename KeyType, typename DType>
-// void TFAdapter<KeyType, DType>::set(
-//     std::vector<tensorflow::core::RefCountPtr<tensorflow::EmbeddingVar<KeyType,
-//     DType>> &vars, std::vector<tensorflow::tf_shared_lock> &locks,
-//     std::vector<int> &dimensions, std::vector<int> &scale,
-//     cudaStream_t stream) {
-// }
-
-// template <typename KeyType, typename DType>
-// void TFAdapter<KeyType, DType>::free() {
+EmbeddingVarGPUAdapter<KeyType, DType>::EmbeddingVarGPUAdapter() {}
+//     : d_data_(nullptr), d_dimensions_(nullptr),
+//       d_id_space_to_local_index_(nullptr), d_scale_(nullptr), stream_(0) {
+//   int device;
+//   CUDACHECK(cudaGetDevice(&device));
+//   CUDACHECK(cudaDeviceGetAttribute(&sm_count_,
+//   cudaDevAttrMultiProcessorCount,
+//                                    device));
+//   // tensorflow::core::RefCountPtr<tensorflow::EmbeddingVar<KeyType, DType>>
+//   var; auto storage_manager = new embedding::StorageManager<KeyType, float>(
+//                  "name", embedding::StorageConfig());
+//   TF_CHECK_OK(storage_manager->Init());
+//   EmbeddingVar<int64, float>* emb_var
+//     = new EmbeddingVar<KeyType, float>("name",
+//         storage_manager, EmbeddingConfig(0, 0, 1, 1, "", -1, 0,
+//         99999, 14.0));
+//   emb_var ->Init(value, 1);
+//   // emb_var->BatchCommit();
 // }
 
 template <typename KeyType, typename DType>
-TFAdapter<KeyType, DType>::~TFAdapter() {
+
+void EmbeddingVarGPUAdapter<KeyType, DType>::set(
+    std::vector<core::RefCountPtr<EmbeddingVarGPU<KeyType, DType>>> &vars,
+    std::vector<tf_shared_lock> &locks, std::vector<int> &dimensions,
+    std::vector<int> &scale, cudaStream_t stream) {}
+
+// // template <typename KeyType, typename DType>
+// // void EmbeddingVarGPUAdapter<KeyType, DType>::free() {
+// // }
+
+template <typename KeyType, typename DType>
+EmbeddingVarGPUAdapter<KeyType, DType>::~EmbeddingVarGPUAdapter() {
   //   free();
 }
 
 template <typename KeyType, typename DType>
-void TFAdapter<KeyType, DType>::lookup(const ::core::Tensor &keys,
-                                       size_t num_keys,
-                                       const ::core::Tensor &id_space_offset,
-                                       size_t num_id_space_offset,
-                                       const ::core::Tensor &id_space,
-                                       ::core::TensorList &embedding_vec) {
-  // TFAdapterKernel<KeyType, DType><<<2 * sm_count_, 1024ul, 0, stream_>>>(
+void EmbeddingVarGPUAdapter<KeyType, DType>::lookup(
+    const ::core::Tensor &keys, size_t num_keys,
+    const ::core::Tensor &id_space_offset, size_t num_id_space_offset,
+    const ::core::Tensor &id_space, ::core::TensorList &embedding_vec) {
+  // EmbeddingVarGPUAdapterKernel<KeyType, DType><<<2 * sm_count_, 1024ul, 0,
+  // stream_>>>(
   //     d_data_, d_dimensions_, d_scale_, d_id_space_to_local_index_,
   //     keys.get<KeyType>(), num_keys, id_space_offset.get<uint32_t>(),
   //     num_id_space_offset - 1, id_space.get<int>(),
@@ -96,8 +96,8 @@ void TFAdapter<KeyType, DType>::lookup(const ::core::Tensor &keys,
   // }
 }
 
-template class TFAdapter<int32_t, float>;
-// template class TFAdapter<int32_t, __half>;
-template class TFAdapter<int64_t, float>;
-// template class TFAdapter<int64_t, __half>;
-} // namespace deeprec
+template class EmbeddingVarGPUAdapter<int32_t, float>;
+// template class EmbeddingVarGPUAdapter<int32_t, __half>;
+template class EmbeddingVarGPUAdapter<int64_t, float>;
+// template class EmbeddingVarGPUAdapter<int64_t, __half>;
+} // namespace tensorflow
